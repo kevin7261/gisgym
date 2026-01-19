@@ -265,8 +265,6 @@
       'geojsonFileName',
       'jsonFileName',
       'executeFunction',
-      'isDataLayer',
-      'hideFromMap',
       'display',
       'upperViewTabs',
     ];

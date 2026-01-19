@@ -1,6 +1,6 @@
 <script>
   /**
-   * 🏠 HomeView.vue - Schematic Map系統主頁面
+   * 🏠 HomeView.vue - GISGym系統主頁面
    *
    * 功能說明：
    * 1. 🗺️ 提供地圖視覺化和資料分析的主要介面
@@ -398,11 +398,11 @@
         const isDesktop = window.innerWidth >= 1200; // xl breakpoint
 
         if (isDesktop) {
-          // 桌面版：切換到右側屬性分頁
-          activeRightTab.value = 'properties';
+          // 桌面版：切換到右側圖層資訊分頁
+          activeRightTab.value = 'layer-info';
         } else {
-          // 響應式版本：切換到底部屬性分頁
-          activeLowerTab.value = 'properties';
+          // 響應式版本：切換到底部圖層資訊分頁
+          activeLowerTab.value = 'layer-info';
 
           // 如果底部面板高度太小，自動調整到合適的高度
           if (mobileBottomViewHeight.value < 30) {
@@ -715,7 +715,7 @@
       </div>
 
       <!-- 🏠 首頁內容區域 (Home Page Content Area) -->
-      <!-- Schematic Map系統的主要功能界面，使用響應式三面板佈局 -->
+      <!-- GISGym系統的主要功能界面，使用響應式三面板佈局 -->
       <div v-if="$route.path === '/'" class="h-100 d-flex flex-column overflow-hidden">
         <!-- 🖥️ 桌面版佈局 (Desktop Layout - xl and above) -->
         <div class="d-none d-xl-flex flex-row overflow-hidden h-100">

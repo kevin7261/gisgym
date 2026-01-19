@@ -28,21 +28,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
    */
   import DashboardTab from '../tabs/DashboardTab.vue';
 
-  /**
-   * 網格縮放分頁組件引入
-   * 提供網格縮放視覺化功能
-   *
-   * @see ../tabs/GridScalingTab.vue
-   */
-  import GridScalingTab from '../tabs/GridScalingTab.vue';
 
-  /**
-   * 處理後 JSON 數據分頁組件引入
-   * 顯示圖層的處理後 JSON 數據
-   *
-   * @see ../tabs/ProcessedJsonDataTab.vue
-   */
-  import ProcessedJsonDataTab from '../tabs/ProcessedJsonDataTab.vue';
 
   /**
    * 原始 JSON 數據分頁組件引入
@@ -52,13 +38,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
    */
   import JsonDataTab from '../tabs/JsonDataTab.vue';
 
-  /**
-   * 繪製數據分頁組件引入
-   * 顯示圖層的繪製數據
-   *
-   * @see ../tabs/DrawJsonDataTab.vue
-   */
-  import DrawJsonDataTab from '../tabs/DrawJsonDataTab.vue';
   import { getIcon } from '../utils/utils.js';
   import { useDataStore } from '../stores/dataStore.js';
 
@@ -71,10 +50,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
      */
     components: {
       DashboardTab,
-      GridScalingTab,
-      ProcessedJsonDataTab,
       JsonDataTab,
-      DrawJsonDataTab,
     },
 
     /**
@@ -82,7 +58,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
      * 接收來自父組件的配置和狀態數據
      */
     props: {
-      activeUpperTab: { type: String, default: 'grid-scaling' },
+      activeUpperTab: { type: String, default: 'dashboard' },
       mainPanelWidth: { type: Number, default: 60 },
       contentHeight: { type: Number, default: 500 },
       selectedFilter: { type: String, default: '' },
@@ -114,33 +90,18 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
       const DashboardTab = ref(null);
       /** 📊 儀表板容器引用 (用於控制滑鼠事件) */
       const dashboardContainerRef = ref(null);
-      /** 📊 網格縮放視圖組件引用 */
-      const GridScalingTab = ref(null);
-      /** 📊 網格縮放容器引用 (用於控制滑鼠事件) */
-      const gridScalingContainerRef = ref(null);
-      /** 📊 處理後 JSON 數據組件引用 */
-      const ProcessedJsonDataTab = ref(null);
-      /** 📊 處理後 JSON 數據容器引用 */
-      const processedJsonDataContainerRef = ref(null);
       /** 📊 原始 JSON 數據組件引用 */
       const JsonDataTab = ref(null);
       /** 📊 原始 JSON 數據容器引用 */
       const jsonDataContainerRef = ref(null);
-      /** 📊 繪製 JSON 數據組件引用 */
-      const DrawJsonDataTab = ref(null);
-      /** 📊 繪製 JSON 數據容器引用 */
-      const drawJsonDataContainerRef = ref(null);
 
       // 目前 UpperView 所選圖層（由各子 Tab 回傳）
       const activeUpperLayerId = ref(null);
 
       // 所有可能的 tabs 列表
       const allPossibleTabs = [
-        'grid-scaling',
         'dashboard',
-        'processed-json-data',
         'json-data',
-        'draw-json-data',
       ];
 
       // 計算每個 tab 是否啟用（基於當前激活圖層的 upperViewTabs）
@@ -163,7 +124,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
       };
 
       // ==================== 🔄 左側開啟圖層 → UpperView 自動切換 (Auto switch on newly opened layer) ====================
-      // 目標：在 LeftView 開啟圖層時，UpperView 直接切到該圖層，並優先顯示可視化分頁（grid-scaling）
+      // 目標：在 LeftView 開啟圖層時，UpperView 直接切到該圖層
       const visibleLayers = computed(() => dataStore.getAllLayers().filter((l) => l.visible));
 
       // 檢查是否有可見圖層
@@ -191,19 +152,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
           if (added.length > 0) {
             const newestAddedLayerId = added[added.length - 1];
             activeUpperLayerId.value = newestAddedLayerId;
-
-            // 優先顯示可視化分頁（grid-scaling）
-            if (props.activeUpperTab !== 'grid-scaling') {
-              const layer = dataStore.findLayerById(newestAddedLayerId);
-              const tabs = Array.isArray(layer?.upperViewTabs) ? layer.upperViewTabs : [];
-              if (tabs.includes('grid-scaling')) {
-                isUpdatingTab = true;
-                emit('update:activeUpperTab', 'grid-scaling');
-                nextTick(() => {
-                  isUpdatingTab = false;
-                });
-              }
-            }
           }
           // 如果目前選中的圖層不在可見列表中：回到第一個可見圖層
           else if (!activeUpperLayerId.value || !newIds.includes(activeUpperLayerId.value)) {
@@ -264,26 +212,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
               }
             }
 
-            // 處理網格縮放容器
-            if (gridScalingContainerRef.value) {
-              if (dragging && tab === 'grid-scaling') {
-                // 拖曳時禁用網格縮放容器的滑鼠事件
-                gridScalingContainerRef.value.style.pointerEvents = 'none';
-              } else {
-                // 恢復網格縮放容器的滑鼠事件
-                gridScalingContainerRef.value.style.pointerEvents = 'auto';
-              }
-            }
-
-            // 處理處理後 JSON 數據容器
-            if (processedJsonDataContainerRef.value) {
-              if (dragging && tab === 'processed-json-data') {
-                processedJsonDataContainerRef.value.style.pointerEvents = 'none';
-              } else {
-                processedJsonDataContainerRef.value.style.pointerEvents = 'auto';
-              }
-            }
-
             // 處理原始 JSON 數據容器
             if (jsonDataContainerRef.value) {
               if (dragging && tab === 'json-data') {
@@ -293,14 +221,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
               }
             }
 
-            // 處理繪製 JSON 數據容器
-            if (drawJsonDataContainerRef.value) {
-              if (dragging && tab === 'draw-json-data') {
-                drawJsonDataContainerRef.value.style.pointerEvents = 'none';
-              } else {
-                drawJsonDataContainerRef.value.style.pointerEvents = 'auto';
-              }
-            }
 
           });
         },
@@ -311,32 +231,13 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
        * 👀 監聽分頁變化 (Watch Tab Changes)
        * 當切換分頁時觸發相應的更新動作，確保組件正常顯示
        */
-      watch(
-        () => props.activeUpperTab,
-        (newTab) => {
-          if (newTab === 'grid-scaling') {
-            nextTick(() => {
-              setTimeout(() => {
-                if (GridScalingTab.value && GridScalingTab.value.resize) {
-                  GridScalingTab.value.resize();
-                }
-              }, 100); // 給容器一些時間來完成顯示動畫
-            });
-          }
-        }
-      );
 
       /**
        * 👀 監聽面板大小變化 (Watch Panel Size Changes)
        * 當面板寬度或高度變化時，更新相應的子組件
        */
       watch([() => props.mainPanelWidth, () => props.contentHeight], () => {
-        nextTick(() => {
-          // 觸發各個 Tab 重新調整以適應新的容器尺寸
-          if (GridScalingTab.value && GridScalingTab.value.resize) {
-            GridScalingTab.value.resize();
-          }
-        });
+        // 觸發各個 Tab 重新調整以適應新的容器尺寸
       });
 
       /**
@@ -345,11 +246,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
        * 用於響應容器尺寸變化
        */
       const invalidateMapSize = () => {
-        // 觸發 GridScalingTab 重新繪製
-        if (GridScalingTab.value && GridScalingTab.value.resize) {
-          GridScalingTab.value.resize();
-        }
-
         // 觸發全域 resize 事件作為備用方案
         setTimeout(() => {
           const event = new Event('resize');
@@ -359,15 +255,9 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
 
       return {
         DashboardTab, // 儀表板組件引用
-        GridScalingTab, // 網格縮放組件引用
-        ProcessedJsonDataTab, // 處理後 JSON 數據組件引用
         JsonDataTab, // 原始 JSON 數據組件引用
-        DrawJsonDataTab, // 繪製 JSON 數據組件引用
         dashboardContainerRef, // 儀表板容器引用
-        gridScalingContainerRef, // 網格縮放容器引用
-        processedJsonDataContainerRef, // 處理後 JSON 數據容器引用
         jsonDataContainerRef, // 原始 JSON 數據容器引用
-        drawJsonDataContainerRef, // 繪製 JSON 數據容器引用
         invalidateMapSize, // 刷新地圖尺寸功能
 
         // 🛠️ 工具函數
@@ -389,32 +279,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
     <!-- 顯示所有 tabs，沒有圖層支持的 tabs 會被禁用 -->
     <div class="d-flex justify-content-start my-bgcolor-gray-200 p-3">
       <div class="d-flex align-items-center rounded-pill shadow my-blur gap-1 p-2">
-        <!-- 📊 網格縮放按鈕 (Grid Scaling Button) -->
-        <button
-          class="btn rounded-circle border-0 d-flex align-items-center justify-content-center my-btn-transparent my-font-size-xs"
-          :class="{
-            'my-btn-blue': activeUpperTab === 'grid-scaling',
-          }"
-          :disabled="!isTabEnabled['grid-scaling']"
-          @click="$emit('update:activeUpperTab', 'grid-scaling')"
-          title="網格縮放視覺化"
-          style="width: 30px; height: 30px"
-        >
-          <i :class="getIcon('chart_line').icon"></i>
-        </button>
-        <!-- 📄 處理後 JSON 數據按鈕 (Processed JSON Data Button) -->
-        <button
-          class="btn rounded-circle border-0 d-flex align-items-center justify-content-center my-btn-transparent my-font-size-xs"
-          :class="{
-            'my-btn-blue': activeUpperTab === 'processed-json-data',
-          }"
-          :disabled="!isTabEnabled['processed-json-data']"
-          @click="$emit('update:activeUpperTab', 'processed-json-data')"
-          title="處理後 JSON 數據"
-          style="width: 30px; height: 30px"
-        >
-          <i :class="getIcon('code').icon"></i>
-        </button>
         <!-- 📄 原始 JSON 數據按鈕 (Original JSON Data Button) -->
         <button
           class="btn rounded-circle border-0 d-flex align-items-center justify-content-center my-btn-transparent my-font-size-xs"
@@ -427,19 +291,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
           style="width: 30px; height: 30px"
         >
           <i :class="getIcon('json_data').icon"></i>
-        </button>
-        <!-- 🎨 繪製數據按鈕 (Draw Data Button) -->
-        <button
-          class="btn rounded-circle border-0 d-flex align-items-center justify-content-center my-btn-transparent my-font-size-xs"
-          :class="{
-            'my-btn-blue': activeUpperTab === 'draw-json-data',
-          }"
-          :disabled="!isTabEnabled['draw-json-data']"
-          @click="$emit('update:activeUpperTab', 'draw-json-data')"
-          title="繪製數據"
-          style="width: 30px; height: 30px"
-        >
-          <i :class="getIcon('draw_data').icon"></i>
         </button>
         <!-- 📊 儀表板按鈕 (Dashboard Button) -->
         <button
@@ -466,37 +317,10 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
         </div>
       </div>
 
-      <!-- 網格縮放分頁內容 -->
-      <div v-show="hasVisibleLayers && activeUpperTab === 'grid-scaling'" ref="gridScalingContainerRef" class="h-100">
-        <GridScalingTab
-          ref="GridScalingTab"
-          class="flex-grow-1 d-flex flex-column"
-          :containerHeight="contentHeight"
-          :isPanelDragging="isPanelDragging"
-          :activeMarkers="activeMarkers"
-          @active-layer-change="handleActiveLayerChange"
-        />
-      </div>
-
       <!-- 儀表板分頁內容 -->
       <div v-show="hasVisibleLayers && activeUpperTab === 'dashboard'" ref="dashboardContainerRef" class="h-100">
         <DashboardTab
           ref="DashboardTab"
-          :containerHeight="contentHeight"
-          :isPanelDragging="isPanelDragging"
-          :activeMarkers="activeMarkers"
-          @active-layer-change="handleActiveLayerChange"
-        />
-      </div>
-
-      <!-- 處理後 JSON 數據分頁內容 -->
-      <div
-        v-show="hasVisibleLayers && activeUpperTab === 'processed-json-data'"
-        ref="processedJsonDataContainerRef"
-        class="h-100"
-      >
-        <ProcessedJsonDataTab
-          ref="ProcessedJsonDataTab"
           :containerHeight="contentHeight"
           :isPanelDragging="isPanelDragging"
           :activeMarkers="activeMarkers"
@@ -515,20 +339,6 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
         />
       </div>
 
-      <!-- 繪製數據分頁內容 -->
-      <div
-        v-show="hasVisibleLayers && activeUpperTab === 'draw-json-data'"
-        ref="drawJsonDataContainerRef"
-        class="h-100"
-      >
-        <DrawJsonDataTab
-          ref="DrawJsonDataTab"
-          :containerHeight="contentHeight"
-          :isPanelDragging="isPanelDragging"
-          :activeMarkers="activeMarkers"
-          @active-layer-change="handleActiveLayerChange"
-        />
-      </div>
 
     </div>
   </div>

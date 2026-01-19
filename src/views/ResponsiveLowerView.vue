@@ -3,7 +3,6 @@
   import { getIcon } from '../utils/utils.js';
   import LayersTab from '../tabs/LayersTab.vue';
   import DataTableTab from '../tabs/DataTableTab.vue';
-  import PropertiesTab from '../tabs/PropertiesTab.vue';
   import LayerInfo from '../tabs/LayerInfoTab.vue';
 
   export default {
@@ -16,7 +15,6 @@
     components: {
       LayersTab, // 圖層列表分頁組件
       DataTableTab, // 資料表格分頁組件
-      PropertiesTab, // 物件屬性分頁組件
       LayerInfo, // 圖層資訊分頁組件
     },
 
@@ -58,7 +56,6 @@
       const availableTabs = computed(() => [
         { id: 'layers', name: '圖層', icon: getIcon('layer_group').icon },
         { id: 'table', name: '資料表', icon: getIcon('table').icon },
-        { id: 'properties', name: '屬性', icon: getIcon('location_dot').icon },
         { id: 'layer-info', name: '圖層資訊', icon: getIcon('info_circle').icon },
       ]);
 
@@ -167,11 +164,6 @@
           @highlight-on-map="$emit('highlight-on-map', $event)"
           @feature-selected="$emit('feature-selected', $event)"
         />
-      </div>
-
-      <!-- 📈 物件屬性分頁內容 -->
-      <div v-show="activeTab === 'properties'" class="h-100">
-        <PropertiesTab @highlight-feature="$emit('highlight-feature', $event)" />
       </div>
 
       <!-- 📊 圖層資訊分頁內容 -->

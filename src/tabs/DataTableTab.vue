@@ -309,7 +309,7 @@ Cheng * @since 1.0.0 */
    * @param {Object} layer - 圖層物件
    */
   const handleItemClick = (item, layer) => {
-    // 創建符合 PropertiesTab 期望的 feature 格式
+    // 創建符合選中要素格式的 feature
     const feature = {
       properties: {
         id: item['#'] || item.id || 'unknown',

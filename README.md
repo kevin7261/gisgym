@@ -1,4 +1,4 @@
-# 🗺️ GISGym - 示意圖響應式網站
+# 🗺️ GISGym - 網格示意圖響應式網站
 
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.2.13-4FC08D?style=flat-square&logo=vue.js)](https://vuejs.org/)
 [![D3.js](https://img.shields.io/badge/D3.js-7.8.0-F9A03C?style=flat-square&logo=d3.js)](https://d3js.org/)
@@ -6,7 +6,7 @@
 [![Pinia](https://img.shields.io/badge/Pinia-2.1.0-FFD859?style=flat-square&logo=pinia)](https://pinia.vuejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-> 基於 Vue 3 和 D3.js 的現代化示意圖響應式網站，專為地理空間數據視覺化和互動式地圖展示而設計。所有程式碼均包含詳細的中文註解，便於學習和維護。
+> 基於 Vue 3 和 D3.js 的現代化網格示意圖響應式網站，專為網格數據視覺化和互動式展示而設計。所有程式碼均包含詳細的中文註解，便於學習和維護。
 
 ## 📋 目錄
 
@@ -24,39 +24,38 @@
 
 ## 專案概述
 
-GISGym 是一個現代化的響應式示意圖展示平台，結合 Vue 3 的前端技術和 D3.js 的視覺化能力，提供完整的地理資訊系統解決方案。
+GISGym 是一個現代化的響應式網格示意圖展示平台，結合 Vue 3 的前端技術和 D3.js 的視覺化能力，提供完整的網格數據視覺化解決方案。
 
 ### 核心特色
 
 - **🎨 現代化設計**：採用 Bootstrap 5 響應式框架
 - **⚡ 高性能**：使用 Vue 3 Composition API 和 Pinia 狀態管理
 - **📱 完全響應式**：支援桌面、平板、手機等各種設備
-- **🗺️ 強大的視覺化**：整合 D3.js 提供豐富的數據視覺化
+- **📊 強大的視覺化**：整合 D3.js 提供豐富的網格數據視覺化
 - **🔧 模組化架構**：採用組件化設計，易於維護和擴展
 - **📝 詳細註解**：所有程式碼均包含完整的中文 JSDoc 註解
 - **🎓 易於學習**：適合學習 Vue 3、D3.js 和現代前端開發
 
 ### 應用場景
 
-- 地理資訊系統 (GIS)
-- 城市規劃與交通分析
-- 環境監測與數據視覺化
+- 網格數據視覺化
+- 空間分析與數據展示
 - 學術研究與教育培訓
-- 商業智能分析
+- 數據分析與統計展示
 
 ## 主要功能
 
 ### 🗺️ 圖層管理系統
 
-- **多圖層支援**：分組管理、動態載入、狀態追蹤
-- **圖層類型**：網格示意圖、行政區示意圖、點/線/面數據圖層
-- **批量操作**：支援批量開啟/關閉圖層、智能篩選
+- **圖層支援**：網格示意圖測試圖層
+- **動態載入**：按需載入圖層數據
+- **狀態追蹤**：完整的圖層狀態管理
 
 ### 📊 數據視覺化
 
+- **網格縮放視覺化**：互動式網格縮放展示
 - **D3.js 整合**：互動式圖表、動畫效果、自定義渲染
-- **視覺化類型**：網絡圖、散點圖、熱力圖、統計圖表
-- **互動功能**：要素選擇、懸停提示、縮放平移、數據篩選
+- **互動功能**：要素選擇、懸停提示、縮放平移
 
 ### 📱 響應式設計
 
@@ -70,6 +69,7 @@ GISGym 是一個現代化的響應式示意圖展示平台，結合 Vue 3 的前
 
 - **統計摘要**：實時統計、數據摘要、性能指標
 - **表格功能**：多圖層表格、動態欄位、排序篩選、分頁顯示
+- **數據查看**：原始 JSON 數據、處理後 JSON 數據、繪製數據
 
 ## 技術棧
 
@@ -149,7 +149,6 @@ npm run deploy
 gisgym/
 ├── public/                 # 靜態資源
 │   ├── data/              # 數據文件
-│   │   ├── taipei/        # 台北數據
 │   │   └── test/          # 測試數據
 │   └── index.html         # 入口 HTML
 ├── src/                   # 源代碼
@@ -158,26 +157,39 @@ gisgym/
 │   │   ├── LoadingOverlay.vue
 │   │   └── DetailItem.vue
 │   ├── stores/           # Pinia 狀態管理
-│   │   └── dataStore.js   # 主要數據存儲
+│   │   ├── dataStore.js   # 主要數據存儲
+│   │   └── defineStore.js
 │   ├── tabs/             # 分頁組件
-│   │   ├── D3jsTab.vue   # D3.js 視覺化
-│   │   ├── DashboardTab.vue
-│   │   ├── DataTableTab.vue
-│   │   ├── LayersTab.vue
-│   │   ├── PropertiesTab.vue
-│   │   └── LayerInfoTab.vue
+│   │   ├── GridScalingTab.vue      # 網格縮放視覺化
+│   │   ├── DashboardTab.vue      # 儀表板
+│   │   ├── DataTableTab.vue        # 數據表格
+│   │   ├── ProcessedJsonDataTab.vue # 處理後 JSON 數據
+│   │   ├── JsonDataTab.vue         # 原始 JSON 數據
+│   │   ├── DrawJsonDataTab.vue     # 繪製數據
+│   │   ├── LayersTab.vue           # 圖層列表
+│   │   ├── PropertiesTab.vue       # 屬性資訊
+│   │   ├── LayerInfoTab.vue         # 圖層資訊
+│   │   └── ControlTab.vue           # 操作控制
 │   ├── utils/           # 工具函數
 │   │   ├── dataProcessor.js  # 數據處理核心
-│   │   └── utils.js
+│   │   ├── gridMergeReduce.js
+│   │   ├── utils.js
+│   │   └── dataExecute/     # 數據執行模組
 │   ├── views/           # 頁面組件
 │   │   ├── HomeView.vue
 │   │   ├── LeftView.vue
 │   │   ├── MiddleView.vue
-│   │   └── RightView.vue
+│   │   ├── UpperView.vue
+│   │   ├── BottomView.vue
+│   │   ├── RightView.vue
+│   │   └── ResponsiveLowerView.vue
 │   ├── router/          # 路由配置
 │   ├── App.vue          # 根組件
 │   └── main.js          # 入口文件
 ├── docs/                # 文檔
+│   ├── GRID_VALUES_DOCUMENTATION.md
+│   ├── PACKAGE_JSON_DOCUMENTATION.md
+│   └── QUICK_START_GRID_VALUES.md
 ├── package.json         # 專案配置
 └── README.md           # 專案說明
 ```
@@ -265,11 +277,11 @@ import { useDataStore } from '@/stores/dataStore';
 const dataStore = useDataStore();
 
 // 切換圖層可見性
-await dataStore.toggleLayerVisibility('taipei_metro');
+await dataStore.toggleLayerVisibility('test_layer');
 
 // 獲取可見圖層
 const visibleLayers = computed(() =>
-  dataStore.layers.filter((layer) => layer.visible)
+  dataStore.getAllLayers().filter((layer) => layer.visible)
 );
 ```
 
@@ -279,18 +291,13 @@ const visibleLayers = computed(() =>
 
 ```javascript
 import {
-  loadDataLayerJson,
   loadGridSchematicJson,
+  processGridToDrawData,
 } from '@/utils/dataProcessor';
 
-// 載入數據圖層
-const layerData = await loadDataLayerJson({
-  jsonFileName: 'taipei/metro.json',
-});
-
 // 載入網格示意圖
-const gridData = await loadGridSchematicJson({
-  jsonFileName: 'test/grid.json',
+const layerData = await loadGridSchematicJson({
+  jsonFileName: 'test/test.json',
 });
 ```
 
@@ -308,42 +315,11 @@ const gridData = await loadGridSchematicJson({
 - `x`: 網格的水平節點數量
 - `y`: 網格的垂直節點數量
 
-### 行政區示意圖數據格式
+### 測試數據位置
 
-```json
-[
-  {
-    "name": "路線名稱",
-    "color": "red",
-    "nodes": [
-      {
-        "coord": { "x": 0, "y": 0 },
-        "value": 1,
-        "type": 1
-      }
-    ]
-  }
-]
-```
-
-### 標準地理數據格式
-
-```json
-[
-  {
-    "name": "要素名稱",
-    "id": "要素ID",
-    "type": "要素類型",
-    "properties": {
-      "屬性名": "屬性值"
-    },
-    "geometry": {
-      "type": "Point|LineString|Polygon",
-      "coordinates": [經度, 緯度]
-    }
-  }
-]
-```
+測試數據位於 `public/data/test/` 目錄下：
+- `test.json` - 主要測試數據
+- `test_small_grid.json` - 小型網格測試數據
 
 更多數據格式說明請參考 `docs/` 目錄下的文檔。
 
@@ -362,8 +338,11 @@ Pinia store 實例，提供圖層管理和狀態控制功能。
 | `toggleLayerVisibility` | `layerId: string` | `Promise<void>` | 切換圖層可見性 |
 | `findLayerById` | `layerId: string` | `Object\|null` | 根據 ID 搜尋圖層 |
 | `getAllLayers` | - | `Array` | 獲取所有圖層 |
+| `getAllLayers` | - | `Array` | 獲取所有圖層 |
 | `setSelectedFeature` | `feature: Object` | `void` | 設定選中要素 |
 | `clearSelectedFeature` | - | `void` | 清除選中要素 |
+| `reloadLayer` | `layerId: string` | `Promise<void>` | 重新載入圖層 |
+| `findGroupNameByLayerId` | `layerId: string` | `string\|null` | 根據圖層 ID 查找組名 |
 
 ##### 使用範例
 
@@ -373,27 +352,17 @@ import { useDataStore } from '@/stores/dataStore';
 const dataStore = useDataStore();
 
 // 切換圖層可見性
-await dataStore.toggleLayerVisibility('taipei_metro');
+await dataStore.toggleLayerVisibility('test_layer');
 
 // 設定選中的要素
 dataStore.setSelectedFeature({
   id: 'feature-1',
-  name: '台北車站',
-  properties: { type: 'station' },
+  name: '測試要素',
+  properties: { type: 'grid' },
 });
 ```
 
 ### 數據處理 API
-
-#### `loadDataLayerJson(layer)`
-
-載入數據圖層 JSON 數據。
-
-**參數：**
-- `layer` - 圖層配置對象，包含 `jsonFileName` 屬性
-
-**返回：**
-- `Promise<Object>` - 包含處理後數據的對象
 
 #### `loadGridSchematicJson(layer)`
 
@@ -403,7 +372,17 @@ dataStore.setSelectedFeature({
 - `layer` - 圖層配置對象，包含 `jsonFileName` 屬性
 
 **返回：**
-- `Promise<Object>` - 包含網格數據的對象
+- `Promise<Object>` - 包含處理後數據的對象
+
+#### `processGridToDrawData(processedJsonData)`
+
+處理網格數據為繪製數據。
+
+**參數：**
+- `processedJsonData` - 處理後的 JSON 數據
+
+**返回：**
+- `Object` - 繪製數據對象
 
 ## 故障排除
 
@@ -414,7 +393,7 @@ dataStore.setSelectedFeature({
 **問題：** 圖層數據無法載入或顯示錯誤
 
 **解決方案：**
-1. 檢查數據文件路徑是否正確
+1. 檢查數據文件路徑是否正確（應位於 `public/data/test/`）
 2. 確認數據文件格式是否符合要求
 3. 查看瀏覽器控制台的錯誤信息
 4. 檢查網路連接和防火牆設定

@@ -1,22 +1,13 @@
-/** * 📊 右側分析面板組件 (Right Analysis Panel Component) * * 功能說明 (Features): * 1. 📋
-屬性資訊顯示：顯示選中地圖要素的詳細屬性資訊 * 2. 📊 圖層資訊管理：提供圖層統計資訊和項目數量顯示 *
-3. 🔄 分頁切換：支援屬性分頁和圖層資訊分頁的切換 * 4. 📱 響應式設計：適配不同螢幕尺寸的顯示需求 * 5.
-🎯 狀態同步：與全域狀態管理系統保持同步 * 6. 🎨 視覺化增強：提供美觀的分頁導航和內容展示 * *
+/** * 📊 右側分析面板組件 (Right Analysis Panel Component) * * 功能說明 (Features): * 1. 📊 圖層資訊管理：提供圖層統計資訊和項目數量顯示 *
+2. 🔄 分頁切換：支援圖層資訊分頁和操作控制分頁的切換 * 3. 📱 響應式設計：適配不同螢幕尺寸的顯示需求 * 4.
+🎯 狀態同步：與全域狀態管理系統保持同步 * 5. 🎨 視覺化增強：提供美觀的分頁導航和內容展示 * *
 技術特點 (Technical Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合 Pinia 狀態管理系統 *
 - 支援響應式佈局和動態尺寸調整 * - 提供完整的事件處理和狀態同步 * - 整合多個分頁組件的協調工作 * *
-包含分頁 (Included Tabs): * - PropertiesTab：屬性分頁，顯示選中要素的詳細屬性 * -
-LayerInfo：圖層資訊分頁，顯示圖層統計和項目數量 * * @file RightView.vue * @version 2.0.0 * @author
+包含分頁 (Included Tabs): * - LayerInfo：圖層資訊分頁，顯示圖層統計和項目數量 * - ControlTab：操作控制分頁，提供圖層操作和執行功能 * * @file RightView.vue * @version 2.0.0 * @author
 Kevin Cheng * @since 1.0.0 */
 <script>
   // ==================== 📦 第三方庫引入 (Third-Party Library Imports) ====================
 
-  /**
-   * 屬性分頁組件引入
-   * 提供選中地圖要素的詳細屬性顯示功能
-   *
-   * @see ../tabs/PropertiesTab.vue
-   */
-  import PropertiesTab from '../tabs/PropertiesTab.vue';
 
   /**
    * 空間分析分頁組件引入
@@ -54,7 +45,6 @@ Kevin Cheng * @since 1.0.0 */
   export default {
     name: 'RightView',
     components: {
-      PropertiesTab, // 物件屬性分頁組件
       LayerInfo, // 圖層資訊分頁組件
       ControlTab, // 操作控制分頁組件
     },
@@ -105,7 +95,6 @@ Kevin Cheng * @since 1.0.0 */
       const availableTabs = [
         { id: 'layer-info', name: '圖層', icon: getIcon('info_circle').icon },
         { id: 'control', name: '操作', icon: getIcon('play').icon },
-        { id: 'properties', name: '屬性', icon: getIcon('location_dot').icon },
       ];
 
       // 🔘 切換分頁
@@ -179,14 +168,6 @@ Kevin Cheng * @since 1.0.0 */
 
     <!-- 📄 右側分頁內容區域 -->
     <div class="flex-grow-1 overflow-auto">
-      <!-- 📋 物件屬性分頁內容 -->
-      <div v-show="$props.activeRightTab === 'properties'" class="h-100">
-        <PropertiesTab
-          :selected-feature="selectedFeature"
-          @highlight-feature="$emit('highlight-feature', $event)"
-        />
-      </div>
-
       <!-- 📊 圖層資訊分頁內容 -->
       <div v-show="$props.activeRightTab === 'layer-info'" class="h-100">
         <LayerInfo />

@@ -113,23 +113,6 @@
     );
   });
 
-  /**
-   * 判斷當前圖層是否為網格示意圖測試圖層
-   * 只有網格示意圖測試圖層才顯示網格預覽
-   *
-   * @type {ComputedRef<boolean>}
-   * @returns {boolean} 是否為網格示意圖測試圖層
-   */
-  const isCurrentLayerGridSchematic = computed(() => {
-    if (!activeLayerTab.value) return false;
-    if (!Array.isArray(visibleLayers.value) || visibleLayers.value.length === 0) {
-      return false;
-    }
-    const currentLayer = visibleLayers.value.find(
-      (layer) => layer && layer.layerId === activeLayerTab.value
-    );
-    return currentLayer && currentLayer.isGridSchematic === true;
-  });
 
   /**
    * 判斷當前圖層是否為 taipei_6_1_test
@@ -166,6 +149,17 @@
       (currentLayer.value.layerId === 'taipei_6_1_test3' ||
         currentLayer.value.layerId === 'taipei_6_1_test4')
     );
+  });
+
+  /**
+   * 📊 判斷是否為 test_layer 圖層 (Check if is test_layer)
+   * 用於控制 test_layer 專屬功能的顯示
+   *
+   * @type {ComputedRef<boolean>}
+   * @returns {boolean} 是否為 test_layer 圖層
+   */
+  const isTestLayer = computed(() => {
+    return currentLayer.value && currentLayer.value.layerId === 'test_layer';
   });
 
   /**
@@ -512,6 +506,35 @@
     }
   };
 
+  /**
+   * 建立 RAG (Create RAG)
+   * 處理 test_layer 的 RAG 建立功能
+   */
+  const createRAG = async () => {
+    if (!currentLayer.value) {
+      console.warn('當前圖層不存在');
+      return;
+    }
+
+    isExecuting.value = true;
+
+    try {
+      // 等待 UI 更新以顯示"計算中"畫面
+      await nextTick();
+
+      // TODO: 實現 RAG 建立邏輯
+      console.log('建立 RAG 功能待實現', currentLayer.value);
+
+      // 稍微延遲後關閉，確保用戶能看到"計算中"畫面
+      setTimeout(() => {
+        isExecuting.value = false;
+      }, 300);
+    } catch (error) {
+      console.error('建立 RAG 時發生錯誤:', error);
+      isExecuting.value = false;
+    }
+  };
+
   // ==================== 👀 響應式監聽器 (Reactive Watchers) ====================
 
   /**
@@ -583,133 +606,6 @@
     { deep: false, immediate: true }
   );
 
-  // ==================== 🎯 網格預覽功能 (Grid Preview Functions) ====================
-
-  /**
-   * 🎨 網格預覽尺寸 (Grid Preview Size)
-   * 設定網格預覽的 SVG 尺寸
-   */
-  const previewGridSize = 120;
-
-  /**
-   * 📊 取得預覽節點數據 (Get Preview Nodes Data)
-   * 從當前圖層的 processedJsonData 中提取節點信息用於預覽
-   * 使用原始數據，不受刪除邏輯影響
-   */
-  const getPreviewNodes = () => {
-    if (!activeLayerTab.value) return [];
-
-    if (!Array.isArray(visibleLayers.value) || visibleLayers.value.length === 0) {
-      return [];
-    }
-
-    const currentLayer = visibleLayers.value.find(
-      (layer) => layer && layer.layerId === activeLayerTab.value
-    );
-
-    if (!currentLayer || !currentLayer.processedJsonData) return [];
-
-    // 🎯 只使用 processedJsonData 中的原始數據
-    if (
-      currentLayer.processedJsonData.nodes &&
-      Array.isArray(currentLayer.processedJsonData.nodes)
-    ) {
-      return currentLayer.processedJsonData.nodes;
-    }
-
-    return [];
-  };
-
-  /**
-   * 📊 計算每列的最大值 (Calculate Column Max Values)
-   * 用於顯示列的最大值標籤
-   */
-  const getColumnMaxValues = () => {
-    const nodes = getPreviewNodes();
-    const { gridX } = getOriginalGridDimensions();
-
-    if (!Array.isArray(nodes) || gridX <= 0) {
-      return [];
-    }
-
-    const columnMaxValues = new Array(gridX).fill(0);
-
-    nodes.forEach((node) => {
-      if (node && typeof node.x === 'number' && node.x >= 0 && node.x < gridX) {
-        columnMaxValues[node.x] = Math.max(columnMaxValues[node.x], node.value || 0);
-      }
-    });
-
-    return columnMaxValues;
-  };
-
-  /**
-   * 📊 計算每行的最大值 (Calculate Row Max Values)
-   * 用於顯示行的最大值標籤
-   */
-  const getRowMaxValues = () => {
-    const nodes = getPreviewNodes();
-    const { gridY } = getOriginalGridDimensions();
-
-    if (!Array.isArray(nodes) || gridY <= 0) {
-      return [];
-    }
-
-    const rowMaxValues = new Array(gridY).fill(0);
-
-    nodes.forEach((node) => {
-      if (node && typeof node.y === 'number' && node.y >= 0 && node.y < gridY) {
-        rowMaxValues[node.y] = Math.max(rowMaxValues[node.y], node.value || 0);
-      }
-    });
-
-    return rowMaxValues;
-  };
-
-  /**
-   * 📊 取得原始網格尺寸 (Get Original Grid Dimensions)
-   * 從 processedJsonData 中獲取原始網格尺寸，不受刪除邏輯影響
-   */
-  const getOriginalGridDimensions = () => {
-    if (!activeLayerTab.value) return { gridX: 0, gridY: 0 };
-
-    if (!Array.isArray(visibleLayers.value) || visibleLayers.value.length === 0) {
-      return { gridX: 0, gridY: 0 };
-    }
-
-    const currentLayer = visibleLayers.value.find(
-      (layer) => layer && layer.layerId === activeLayerTab.value
-    );
-
-    if (!currentLayer || !currentLayer.processedJsonData) {
-      return { gridX: 0, gridY: 0 };
-    }
-
-    return {
-      gridX: currentLayer.processedJsonData.gridX || 0,
-      gridY: currentLayer.processedJsonData.gridY || 0,
-    };
-  };
-
-  /**
-   * 📍 計算節點 X 座標 (Calculate Node X Position)
-   * 根據節點的 x 索引計算在預覽中的 X 座標
-   */
-  const getNodeX = (nodeX) => {
-    const { gridX } = getOriginalGridDimensions();
-    if (gridX === 0) return 0;
-    return (nodeX + 0.5) * (previewGridSize / gridX);
-  };
-
-  /**
-   * 📍 計算節點 Y 座標 (Calculate Node Y Position)
-   * 根據節點的 y 索引計算在預覽中的 Y 座標
-   */
-  const getNodeY = (nodeY) => {
-    const { gridY } = getOriginalGridDimensions();
-    if (gridY === 0) return 0;
-    return (nodeY + 0.5) * (previewGridSize / gridY);
-  };
 
   /**
    * 🎲 隨機產生權重 (Randomize Weights)
@@ -2772,104 +2668,6 @@
         :key="layer.layerId"
         v-show="activeLayerTab === layer.layerId"
       >
-        <!-- 🎯 網格預覽區域（僅在網格示意圖測試圖層顯示） -->
-        <div v-if="isCurrentLayerGridSchematic" class="pb-3 mb-3 border-bottom">
-          <div class="my-title-xs-gray pb-2">網格預覽</div>
-          <div class="d-flex justify-content-center">
-            <div
-              class="border border-secondary rounded"
-              style="background-color: #212121; padding: 8px"
-            >
-              <svg
-                :width="previewGridSize + 40"
-                :height="previewGridSize + 40"
-                class="border border-dark"
-              >
-                <!-- 定義偏移量，為標籤預留空間 -->
-                <defs>
-                  <g id="grid-container" transform="translate(20, 20)">
-                    <!-- 繪製網格線 -->
-                    <g v-for="i in getOriginalGridDimensions().gridX + 1" :key="'col-' + i">
-                      <line
-                        :x1="(i - 1) * (previewGridSize / getOriginalGridDimensions().gridX)"
-                        :y1="0"
-                        :x2="(i - 1) * (previewGridSize / getOriginalGridDimensions().gridX)"
-                        :y2="previewGridSize"
-                        stroke="#666"
-                        stroke-width="0.5"
-                      />
-                    </g>
-                    <g v-for="i in getOriginalGridDimensions().gridY + 1" :key="'row-' + i">
-                      <line
-                        :x1="0"
-                        :y1="(i - 1) * (previewGridSize / getOriginalGridDimensions().gridY)"
-                        :x2="previewGridSize"
-                        :y2="(i - 1) * (previewGridSize / getOriginalGridDimensions().gridY)"
-                        stroke="#666"
-                        stroke-width="0.5"
-                      />
-                    </g>
-
-                    <!-- 繪製節點數值文字 -->
-                    <text
-                      v-for="node in getPreviewNodes()"
-                      :key="'text-' + node.x + '-' + node.y"
-                      :x="getNodeX(node.x)"
-                      :y="getNodeY(node.y)"
-                      text-anchor="middle"
-                      dominant-baseline="middle"
-                      font-size="8"
-                      font-weight="bold"
-                      fill="#FFFFFF"
-                    >
-                      {{ node.value }}
-                    </text>
-                  </g>
-                </defs>
-
-                <!-- 使用定義的網格容器 -->
-                <use href="#grid-container" />
-
-                <!-- 繪製列最大值標籤 -->
-                <text
-                  v-for="(maxVal, index) in getColumnMaxValues()"
-                  :key="'col-max-' + index"
-                  :x="20 + (index + 0.5) * (previewGridSize / getOriginalGridDimensions().gridX)"
-                  y="15"
-                  text-anchor="middle"
-                  dominant-baseline="bottom"
-                  font-size="8"
-                  font-weight="bold"
-                  fill="#4CAF50"
-                >
-                  {{ maxVal }}
-                </text>
-
-                <!-- 繪製行最大值標籤 -->
-                <text
-                  v-for="(maxVal, index) in getRowMaxValues()"
-                  :key="'row-max-' + index"
-                  x="15"
-                  :y="20 + (index + 0.5) * (previewGridSize / getOriginalGridDimensions().gridY)"
-                  text-anchor="end"
-                  dominant-baseline="middle"
-                  font-size="8"
-                  font-weight="bold"
-                  fill="#4CAF50"
-                >
-                  {{ maxVal }}
-                </text>
-              </svg>
-            </div>
-          </div>
-          <div class="text-center mt-2">
-            <small class="text-muted">
-              {{ getOriginalGridDimensions().gridX }} ×
-              {{ getOriginalGridDimensions().gridY }} 原始網格
-            </small>
-          </div>
-        </div>
-
         <!-- 執行中提示 -->
         <div v-if="isExecuting" class="pb-2 mb-3 border-bottom">
           <div class="my-title-xs-gray pb-2">計算中...</div>
@@ -2893,6 +2691,17 @@
             "
           >
             執行下一步
+          </button>
+        </div>
+
+        <!-- 建立 RAG 按鈕區域（僅 test_layer 顯示） -->
+        <div v-if="isTestLayer && currentLayer" class="pb-3 mb-3 border-bottom">
+          <button
+            class="btn rounded-pill border-0 my-btn-green my-font-size-xs text-nowrap w-100 my-cursor-pointer"
+            @click="createRAG"
+            :disabled="isExecuting"
+          >
+            建立RAG
           </button>
         </div>
 
@@ -3483,7 +3292,7 @@
 
     <!-- 沒有開啟的圖層 -->
     <div v-else class="d-flex align-items-center justify-content-center h-100">
-      <div class="my-title-xs-gray text-center">沒有開啟的圖層</div>
+      <div class="my-title-md-gray text-center p-3">沒有開啟的圖層</div>
     </div>
   </div>
 </template>

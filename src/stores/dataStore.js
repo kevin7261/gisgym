@@ -104,10 +104,6 @@ import { ref, computed } from 'vue';
  * 數據處理工具函數引入
  * 提供數據載入功能
  */
-import {
-  loadGridSchematicJson,
-  processGridToDrawData,
-} from '../utils/dataProcessor.js';
 
 // ==================== 📦 主要數據存儲定義 (Main Data Store Definition) ====================
 
@@ -188,10 +184,7 @@ export const useDataStore = defineStore(
      * - geojsonLoader: 圖層 GeoJSON 數據載入函數
      * - jsonFileName: 圖層 JSON 文件名稱
      * - geojsonFileName: 圖層 GeoJSON 文件名稱
-     * - isDataLayer: 是否為數據圖層
-     * - hideFromMap: 是否從地圖隱藏
      * - display: 是否顯示
-     * - isGridSchematic: 是否為網格示意圖
      *
      * @type {Ref<Array>} 圖層配置響應式陣列
      * @since 1.0.0
@@ -202,38 +195,22 @@ export const useDataStore = defineStore(
         groupLayers: [
           {
             layerId: 'test_layer',
-            layerName: '網格示意圖測試',
+            layerName: '測試',
             visible: false,
             isLoading: false,
             isLoaded: false,
             colorName: 'green',
             jsonData: null,
-            spaceNetworkGridJsonData: null,
-            layoutGridJsonData: null,
-            layoutGridJsonData_Test: null,
-            layoutGridJsonData_Test2: null,
-            layoutGridJsonData_Test3: null,
-            layoutGridJsonData_Test4: null,
-            geojsonData: null,
             processedJsonData: null,
-            drawJsonData: null,
             dashboardData: null,
             dataTableData: null,
             layerInfoData: null,
-            jsonLoader: loadGridSchematicJson,
-            geojsonLoader: null,
-            processToDrawData: processGridToDrawData,
-            jsonFileName: 'test/test.json',
-            isDataLayer: true,
-            hideFromMap: true,
+            jsonLoader: null,
+            jsonFileName: null,
             display: true,
-            isGridSchematic: true, // 標記為網格示意圖類型
             upperViewTabs: [
-              'grid-scaling',
               'dashboard',
-              'processed-json-data',
               'json-data',
-              'draw-json-data',
             ],
           },
         ],
@@ -396,8 +373,6 @@ export const useDataStore = defineStore(
      * // 篩選載入中的圖層
      * const loadingLayers = allLayers.filter(layer => layer.isLoading);
      *
-     * // 搜尋特定類型的圖層
-     * const gridLayers = allLayers.filter(layer => layer.isGridSchematic);
      * ```
      *
      * 📊 返回數據結構 (Return Data Structure):
@@ -418,10 +393,7 @@ export const useDataStore = defineStore(
      *     layerInfoData: Object,      // 圖層資訊數據
      *     jsonLoader: Function,   // 圖層數據載入函數
      *     jsonFileName: string,   // 圖層 JSON 文件名稱
-     *     isDataLayer: boolean,   // 是否為數據圖層
-     *     hideFromMap: boolean,   // 是否從地圖隱藏
-     *     display: boolean,       // 是否顯示
-     *     isGridSchematic: boolean // 是否為網格示意圖
+     *     display: boolean        // 是否顯示
      *   }
      * ]
      * ```
