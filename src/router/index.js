@@ -43,6 +43,14 @@ import { createRouter, createWebHistory } from 'vue-router';
  */
 import HomeView from '../views/HomeView.vue';
 
+/**
+ * RAG 頁面視圖組件引入
+ * PDF 轉向量庫功能界面
+ *
+ * @see ../views/RagView.vue
+ */
+import RagView from '../views/RagView.vue';
+
 // ==================== 📍 路由配置定義 (Route Configuration Definition) ====================
 
 /**
@@ -68,6 +76,16 @@ const routes = [
     meta: {
       title: '示意圖響應式網站', // 頁面標題
       description: 'GISGym', // 頁面描述
+      requiresAuth: false, // 是否需要身份驗證
+    },
+  },
+  {
+    path: '/rag', // 📄 RAG 路徑
+    name: 'Rag', // 路由名稱
+    component: RagView, // 對應的 Vue 組件
+    meta: {
+      title: 'PDF 轉向量庫 (RAG)', // 頁面標題
+      description: 'PDF 文件轉換為 FAISS 向量庫', // 頁面描述
       requiresAuth: false, // 是否需要身份驗證
     },
   },
