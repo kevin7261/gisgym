@@ -31,12 +31,11 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
 
 
   /**
-   * 原始 JSON 數據分頁組件引入
-   * 顯示圖層的原始 JSON 數據
+   * 工作分頁組件引入
    *
-   * @see ../tabs/JsonDataTab.vue
+   * @see ../tabs/WorkTab.vue
    */
-  import JsonDataTab from '../tabs/JsonDataTab.vue';
+  import WorkTab from '../tabs/WorkTab.vue';
 
   import { getIcon } from '../utils/utils.js';
   import { useDataStore } from '../stores/dataStore.js';
@@ -50,7 +49,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
      */
     components: {
       DashboardTab,
-      JsonDataTab,
+      WorkTab,
     },
 
     /**
@@ -90,10 +89,10 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
       const DashboardTab = ref(null);
       /** 📊 儀表板容器引用 (用於控制滑鼠事件) */
       const dashboardContainerRef = ref(null);
-      /** 📊 原始 JSON 數據組件引用 */
-      const JsonDataTab = ref(null);
-      /** 📊 原始 JSON 數據容器引用 */
-      const jsonDataContainerRef = ref(null);
+      /** 📊 工作分頁組件引用 */
+      const WorkTab = ref(null);
+      /** 📊 工作分頁容器引用 */
+      const workContainerRef = ref(null);
 
       // 目前 UpperView 所選圖層（由各子 Tab 回傳）
       const activeUpperLayerId = ref(null);
@@ -101,7 +100,7 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
       // 所有可能的 tabs 列表
       const allPossibleTabs = [
         'dashboard',
-        'json-data',
+        'work',
       ];
 
       // 計算每個 tab 是否啟用（基於當前激活圖層的 upperViewTabs）
@@ -152,6 +151,17 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
           if (added.length > 0) {
             const newestAddedLayerId = added[added.length - 1];
             activeUpperLayerId.value = newestAddedLayerId;
+
+          const layer = dataStore.findLayerById(newestAddedLayerId);
+          const allowedTabs = Array.isArray(layer?.upperViewTabs) ? layer.upperViewTabs : [];
+          const preferredTab = allowedTabs[0] || null;
+          if (preferredTab && preferredTab !== props.activeUpperTab) {
+            isUpdatingTab = true;
+            emit('update:activeUpperTab', preferredTab);
+            nextTick(() => {
+              isUpdatingTab = false;
+            });
+          }
           }
           // 如果目前選中的圖層不在可見列表中：回到第一個可見圖層
           else if (!activeUpperLayerId.value || !newIds.includes(activeUpperLayerId.value)) {
@@ -212,12 +222,12 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
               }
             }
 
-            // 處理原始 JSON 數據容器
-            if (jsonDataContainerRef.value) {
-              if (dragging && tab === 'json-data') {
-                jsonDataContainerRef.value.style.pointerEvents = 'none';
+            // 處理工作分頁容器
+            if (workContainerRef.value) {
+              if (dragging && tab === 'work') {
+                workContainerRef.value.style.pointerEvents = 'none';
               } else {
-                jsonDataContainerRef.value.style.pointerEvents = 'auto';
+                workContainerRef.value.style.pointerEvents = 'auto';
               }
             }
 
@@ -255,9 +265,9 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
 
       return {
         DashboardTab, // 儀表板組件引用
-        JsonDataTab, // 原始 JSON 數據組件引用
+        WorkTab, // 工作分頁組件引用
         dashboardContainerRef, // 儀表板容器引用
-        jsonDataContainerRef, // 原始 JSON 數據容器引用
+        workContainerRef, // 工作分頁容器引用
         invalidateMapSize, // 刷新地圖尺寸功能
 
         // 🛠️ 工具函數
@@ -279,18 +289,18 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
     <!-- 顯示所有 tabs，沒有圖層支持的 tabs 會被禁用 -->
     <div class="d-flex justify-content-start my-bgcolor-gray-200 p-3">
       <div class="d-flex align-items-center rounded-pill shadow my-blur gap-1 p-2">
-        <!-- 📄 原始 JSON 數據按鈕 (Original JSON Data Button) -->
+        <!-- 📄 工作分頁按鈕 (Work Tab Button) -->
         <button
           class="btn rounded-circle border-0 d-flex align-items-center justify-content-center my-btn-transparent my-font-size-xs"
           :class="{
-            'my-btn-blue': activeUpperTab === 'json-data',
+            'my-btn-blue': activeUpperTab === 'work',
           }"
-          :disabled="!isTabEnabled['json-data']"
-          @click="$emit('update:activeUpperTab', 'json-data')"
-          title="原始 JSON 數據"
+          :disabled="!isTabEnabled['work']"
+          @click="$emit('update:activeUpperTab', 'work')"
+          title="工作"
           style="width: 30px; height: 30px"
         >
-          <i :class="getIcon('json_data').icon"></i>
+          <i :class="getIcon('work').icon"></i>
         </button>
         <!-- 📊 儀表板按鈕 (Dashboard Button) -->
         <button
@@ -328,10 +338,10 @@ Features): * - 使用 Vue 2 Options API 進行組件管理 * - 整合多個分�
         />
       </div>
 
-      <!-- 原始 JSON 數據分頁內容 -->
-      <div v-show="hasVisibleLayers && activeUpperTab === 'json-data'" ref="jsonDataContainerRef" class="h-100">
-        <JsonDataTab
-          ref="JsonDataTab"
+      <!-- 工作分頁內容 -->
+      <div v-show="hasVisibleLayers && activeUpperTab === 'work'" ref="workContainerRef" class="h-100">
+        <WorkTab
+          ref="WorkTab"
           :containerHeight="contentHeight"
           :isPanelDragging="isPanelDragging"
           :activeMarkers="activeMarkers"

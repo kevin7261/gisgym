@@ -83,6 +83,9 @@ export const ICONS = {
   project_diagram: { zh: '網絡圖', en: 'Network Diagram', icon: '<i class="fas fa-project-diagram"></i>' },
   th: { zh: '網格', en: 'Grid', icon: '<i class="fas fa-th"></i>' },
   file_code: { zh: '代碼文件', en: 'Code File', icon: '<i class="fas fa-file-code"></i>' },
+
+  // 工作相關圖標
+  work: { zh: '工作', en: 'Work', icon: '<i class="fas fa-briefcase"></i>' },
 };
 
 /**

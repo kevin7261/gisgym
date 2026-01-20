@@ -148,6 +148,7 @@ export const useDataStore = defineStore(
      * - jsonData: 圖層的原始 JSON 數據（不可修改）
      * - processedJsonData: 圖層的處理後 JSON 數據（用於顯示和計算）
      * - geojsonData: 圖層的 GeoJSON 數據（如果圖層包含 GeoJSON 格式數據）
+     * - workData: 圖層的工作數據
      * - dashboardData: 圖層的儀表板數據
      * - dataTableData: 圖層的表格數據
      * - layerInfoData: 圖層的資訊數據
@@ -177,6 +178,7 @@ export const useDataStore = defineStore(
      * - jsonData: 圖層原始 JSON 數據（不可修改）
      * - processedJsonData: 圖層處理後 JSON 數據（用於顯示和計算）
      * - geojsonData: 圖層的 GeoJSON 數據（如果圖層包含 GeoJSON 格式數據）
+     * - workData: 圖層工作數據
      * - dashboardData: 圖層儀表板數據
      * - dataTableData: 圖層表格數據
      * - layerInfoData: 圖層資訊數據
@@ -202,6 +204,7 @@ export const useDataStore = defineStore(
             colorName: 'green',
             jsonData: null,
             processedJsonData: null,
+            workData: null,
             dashboardData: null,
             dataTableData: null,
             layerInfoData: null,
@@ -209,8 +212,8 @@ export const useDataStore = defineStore(
             jsonFileName: null,
             display: true,
             upperViewTabs: [
+              'work',
               'dashboard',
-              'json-data',
             ],
           },
         ],
@@ -259,6 +262,7 @@ export const useDataStore = defineStore(
      * @param {Object} [stateData.jsonData] - 圖層原始 JSON 數據
      * @param {Object} [stateData.processedJsonData] - 圖層處理後 JSON 數據
      * @param {Object} [stateData.geojsonData] - 圖層的 GeoJSON 數據
+     * @param {Object} [stateData.workData] - 圖層工作數據
      * @param {Object} [stateData.dashboardData] - 圖層儀表板數據
      * @param {Array} [stateData.dataTableData] - 圖層表格數據
      * @param {Object} [stateData.layerInfoData] - 圖層資訊數據
@@ -388,6 +392,7 @@ export const useDataStore = defineStore(
      *     colorName: string,      // 圖層顏色名稱
      *     jsonData: Object,       // 圖層原始 JSON 數據
      *     processedJsonData: Object, // 圖層處理後 JSON 數據
+     *     workData: Object,       // 圖層工作數據
      *     dashboardData: Object,    // 圖層儀表板數據
      *     dataTableData: Array,       // 圖層表格數據
      *     layerInfoData: Object,      // 圖層資訊數據
