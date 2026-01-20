@@ -50,6 +50,7 @@ import HomeView from '../views/HomeView.vue';
  * @see ../views/RagView.vue
  */
 import RagView from '../views/RagView.vue';
+import AskView from '../views/AskView.vue';
 
 // ==================== 📍 路由配置定義 (Route Configuration Definition) ====================
 
@@ -86,6 +87,16 @@ const routes = [
     meta: {
       title: 'PDF 轉向量庫 (RAG)', // 頁面標題
       description: 'PDF 文件轉換為 FAISS 向量庫', // 頁面描述
+      requiresAuth: false, // 是否需要身份驗證
+    },
+  },
+  {
+    path: '/ask', // ❓ 問答路徑
+    name: 'Ask', // 路由名稱
+    component: AskView, // 對應的 Vue 組件
+    meta: {
+      title: '上傳 RAG 資料庫問問題', // 頁面標題
+      description: '上傳 rag_db.zip 並向 AI 提問', // 頁面描述
       requiresAuth: false, // 是否需要身份驗證
     },
   },

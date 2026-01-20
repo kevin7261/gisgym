@@ -52,6 +52,107 @@
    */
   const isExecuting = ref(false);
 
+  // ==================== 🤖 RAG 問答功能 (RAG Q&A) ====================
+
+  /**
+   * RAG API 端點
+   */
+  const RAG_API_URL = 'https://kevin7261-gisgym.hf.space/ask_with_zip';
+
+  /**
+   * RAG 向量庫檔案路徑配置（支援開發和生產環境）
+   */
+  const RAG_ZIP_PATHS = {
+    primary: '/gisgym/data/lectures_faiss_db.zip', // 生產環境
+    fallback: '/data/lectures_faiss_db.zip', // 開發環境
+  };
+
+  const ragQuestion = ref('');
+  const ragHistory = ref([]);
+  const ragIsLoading = ref(false);
+  const ragError = ref('');
+
+  const ragHasApi = computed(() => typeof RAG_API_URL === 'string' && RAG_API_URL.trim());
+
+  const isRagLayer = computed(() => {
+    return currentLayer.value && currentLayer.value.layerId === 'test_layer';
+  });
+
+  const clearRagHistory = () => {
+    ragHistory.value = [];
+    ragError.value = '';
+  };
+
+  const askRag = async () => {
+    const input = ragQuestion.value.trim();
+    if (!input || !ragHasApi.value) return;
+
+    ragIsLoading.value = true;
+    ragError.value = '';
+
+    try {
+      // 從 data 目錄讀取 zip 檔案（嘗試主要路徑，失敗則使用備用路徑）
+      let zipResponse;
+      try {
+        zipResponse = await fetch(RAG_ZIP_PATHS.primary);
+        if (!zipResponse.ok) {
+          throw new Error(`主要路徑載入失敗: ${RAG_ZIP_PATHS.primary}`);
+        }
+      } catch (primaryError) {
+        console.warn(`⚠️ 主要路徑載入失敗，嘗試備用路徑: ${RAG_ZIP_PATHS.fallback}`);
+        zipResponse = await fetch(RAG_ZIP_PATHS.fallback);
+        if (!zipResponse.ok) {
+          throw new Error(
+            `無法載入向量庫檔案。主要路徑: ${RAG_ZIP_PATHS.primary}, 備用路徑: ${RAG_ZIP_PATHS.fallback}`
+          );
+        }
+      }
+      const zipBlob = await zipResponse.blob();
+
+      const formData = new FormData();
+      formData.append('file', zipBlob, 'lectures_faiss_db.zip');
+      formData.append('question', input);
+
+      const response = await fetch(RAG_API_URL, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorText;
+        try {
+          const errorData = await response.json();
+          errorText = errorData.error || errorData.message || JSON.stringify(errorData);
+        } catch {
+          errorText = await response.text();
+        }
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const answer =
+        data.answer ||
+        data.response ||
+        data.output ||
+        data.message ||
+        data.result ||
+        JSON.stringify(data);
+      const retrievedChunks = data.retrieved_chunks || data.context || data.chunks || null;
+
+      ragHistory.value.push({
+        question: input,
+        answer,
+        retrievedChunks,
+      });
+
+      ragQuestion.value = '';
+    } catch (error) {
+      ragError.value = `❌ 發生錯誤: ${error.message}`;
+    } finally {
+      ragIsLoading.value = false;
+    }
+  };
+
   // ==================== 📊 計算屬性定義 (Computed Properties Definition) ====================
 
   /**
@@ -2655,6 +2756,58 @@
           </button>
         </div>
 
+        <!-- RAG 問答區（僅 test_layer 顯示） -->
+        <div v-if="isRagLayer" class="pb-3 mb-3 border-bottom">
+          <div class="my-title-xs-gray pb-2">RAG 問答</div>
+          <div class="my-title-xs-gray mb-2">
+            使用向量庫: lectures_faiss_db.zip
+          </div>
+          <div class="mb-2">
+            <textarea
+              v-model="ragQuestion"
+              class="form-control my-font-size-xs"
+              rows="3"
+              placeholder="請輸入問題..."
+            ></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button
+              class="btn rounded-pill border-0 my-btn-blue my-font-size-xs text-nowrap w-100 my-cursor-pointer"
+              @click="askRag"
+              :disabled="ragIsLoading || !ragQuestion.trim() || !ragHasApi"
+            >
+              發問
+            </button>
+            <button
+              class="btn rounded-pill border-0 my-btn-transparent my-font-size-xs text-nowrap w-100 my-cursor-pointer"
+              @click="clearRagHistory"
+              :disabled="ragIsLoading || ragHistory.length === 0"
+            >
+              清除對話
+            </button>
+          </div>
+          <div v-if="!ragHasApi" class="my-title-xs-gray mt-2">
+            請設定 RAG API URL 才能使用
+          </div>
+          <div v-if="ragIsLoading" class="my-title-xs-gray mt-2">查詢中...</div>
+          <div v-if="ragError" class="text-danger my-font-size-xs mt-2">{{ ragError }}</div>
+
+          <div v-if="ragHistory.length > 0" class="mt-3">
+            <div
+              v-for="(item, index) in ragHistory"
+              :key="`rag-${index}`"
+              class="border rounded p-2 mb-2"
+            >
+              <div class="my-title-xs-gray mb-1">Q{{ index + 1 }}: {{ item.question }}</div>
+              <div class="my-title-sm-black">A: {{ item.answer }}</div>
+              <div v-if="item.retrievedChunks" class="my-title-xs-gray mt-2">
+                參考資料：
+                <pre class="rag-chunks">{{ item.retrievedChunks }}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         <!-- LayoutGridTab_Test2 當前尺寸顯示（即時顯示） -->
         <div
@@ -3290,5 +3443,16 @@
   .layer-toggle input:disabled + label {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+
+  .rag-chunks {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 10pt;
+    line-height: 1.4;
+    white-space: pre-wrap;
   }
 </style>

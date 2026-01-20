@@ -1,14 +1,14 @@
 <template>
-  <div class="rag-container">
-    <div class="rag-card">
-      <h1 class="title">🗂️ 製作 RAG 資料庫</h1>
+  <div class="ask-container">
+    <div class="ask-card">
+      <h1 class="title">❓ 上傳 RAG 資料庫問問題</h1>
       <p class="description">
-        請將您的原始教材 (PDF, DOCX 等) 壓縮成 <strong>.zip</strong> 檔上傳，系統會將文件轉換成向量資料庫供下載。
+        請上傳剛剛下載的 <strong>rag_db.zip</strong>，並輸入您的問題，系統會回傳 AI 回答與來源檔案。
       </p>
 
       <!-- 提示框 -->
       <div class="tip">
-        💡 <strong>提示：</strong> 支援巢狀資料夾結構 (Nested Folders)。系統會自動保留檔案路徑資訊，方便 RAG 溯源。
+        💡 <strong>提示：</strong>請上傳 <strong>rag_db.zip</strong>（不要傳原始 PDF），問題可輸入如「這份文件的結論是什麼？」。
       </div>
 
       <!-- 上傳區域 -->
@@ -35,11 +35,24 @@
         📦 已選擇: {{ selectedFile.name }}
       </div>
 
+      <!-- 問題輸入 -->
+      <div class="question-area">
+        <label class="question-label" for="question-input">問題</label>
+        <textarea
+          id="question-input"
+          class="question-input"
+          rows="4"
+          placeholder="例如：這份文件的結論是什麼？"
+          v-model.trim="questionText"
+          @input="clearResult"
+        ></textarea>
+      </div>
+
       <!-- 提交按鈕 -->
       <button
         class="submit-btn"
-        @click="processFile"
-        :disabled="!selectedFile || isProcessing"
+        @click="submitQuestion"
+        :disabled="!selectedFile || !questionText || isProcessing"
       >
         <span v-if="isProcessing" class="loader"></span>
         <span>{{ buttonText }}</span>
@@ -50,11 +63,22 @@
         {{ statusMessage }}
       </div>
 
-      <!-- 下載連結 -->
-      <div v-if="downloadUrl" class="download-link">
-        <a :href="downloadUrl" :download="downloadFileName" @click="handleDownload">
-          🔗 點擊下載 {{ downloadFileName }}
-        </a>
+      <!-- 回答結果 -->
+      <div v-if="resultAnswer" class="result">
+        <div class="result-section">
+          <div class="result-title">問題</div>
+          <div class="result-content">{{ resultQuestion }}</div>
+        </div>
+        <div class="result-section">
+          <div class="result-title">回答</div>
+          <div class="result-content">{{ resultAnswer }}</div>
+        </div>
+        <div v-if="resultSources.length" class="result-section">
+          <div class="result-title">來源</div>
+          <ul class="result-sources">
+            <li v-for="source in resultSources" :key="source">{{ source }}</li>
+          </ul>
+        </div>
       </div>
 
       <!-- 注意事項 -->
@@ -71,20 +95,22 @@
 import { ref, computed } from 'vue';
 
 export default {
-  name: 'RagView',
+  name: 'AskView',
 
   setup() {
     // API 網址
-    const API_URL = 'https://kevin7261-gisgym.hf.space/create_rag_db';
+    const API_URL = 'https://kevin7261-gisgym.hf.space/ask_rag_db';
 
     // 狀態變數
     const selectedFile = ref(null);
+    const questionText = ref('');
     const isProcessing = ref(false);
     const statusMessage = ref('');
     const statusType = ref(''); // 'success', 'error', 'info'
-    const downloadUrl = ref('');
-    const downloadFileName = ref('');
     const isDragOver = ref(false);
+    const resultQuestion = ref('');
+    const resultAnswer = ref('');
+    const resultSources = ref([]);
 
     // 計算屬性
     const uploadText = computed(() => {
@@ -92,20 +118,26 @@ export default {
     });
 
     const buttonText = computed(() => {
-      return isProcessing.value ? '處理中...' : '上傳並建立 RAG 資料庫';
+      return isProcessing.value ? '雲端運算中...' : '上傳並提問';
     });
 
     const statusClass = computed(() => {
       return `status-${statusType.value}`;
     });
 
+    const clearResult = () => {
+      resultQuestion.value = '';
+      resultAnswer.value = '';
+      resultSources.value = [];
+      statusMessage.value = '';
+    };
+
     // 檔案選擇處理
     const handleFileSelect = (event) => {
       const files = event.target.files;
       if (files && files.length > 0) {
         selectedFile.value = files[0];
-        statusMessage.value = '';
-        downloadUrl.value = '';
+        clearResult();
       }
     };
 
@@ -123,15 +155,19 @@ export default {
       const files = event.dataTransfer.files;
       if (files && files.length > 0) {
         selectedFile.value = files[0];
-        statusMessage.value = '';
-        downloadUrl.value = '';
+        clearResult();
       }
     };
 
-    // 處理檔案
-    const processFile = async () => {
+    // 提問處理
+    const submitQuestion = async () => {
       if (!selectedFile.value) {
-        alert('請先選擇一個 ZIP 檔案！');
+        alert('請先選擇一個 rag_db.zip 檔案！');
+        return;
+      }
+
+      if (!questionText.value) {
+        alert('請輸入問題內容！');
         return;
       }
 
@@ -143,15 +179,15 @@ export default {
       }
 
       // 重置狀態
-      downloadUrl.value = '';
-      downloadFileName.value = '';
+      clearResult();
       isProcessing.value = true;
       statusType.value = 'info';
-      statusMessage.value = '🚀 正在上傳文件並建立向量資料庫...這可能需要一點時間，請勿關閉視窗。';
+      statusMessage.value = '🚀 正在上傳資料庫並提問...這可能需要一點時間，請勿關閉視窗。';
 
       try {
         const formData = new FormData();
         formData.append('file', selectedFile.value);
+        formData.append('question', questionText.value);
 
         // 發送 POST 請求
         const response = await fetch(API_URL, {
@@ -164,33 +200,13 @@ export default {
           throw new Error(`伺服器錯誤: ${response.status} - ${errorText}`);
         }
 
-        // 取得 Blob (二進制檔案)
-        const blob = await response.blob();
-
-        // 建立下載連結
-        downloadUrl.value = window.URL.createObjectURL(blob);
-
-        // 處理檔名 (優先從回應標頭取得，否則使用預設名稱)
-        downloadFileName.value = 'rag_db.zip'; // 預設檔名
-        const contentDisposition = response.headers.get('Content-Disposition');
-        if (contentDisposition) {
-          // 嘗試從 Content-Disposition 標頭提取檔名
-          const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-          const matches = filenameRegex.exec(contentDisposition);
-          if (matches != null && matches[1]) {
-            downloadFileName.value = matches[1].replace(/['"]/g, '');
-          } else {
-            // 如果無法解析，嘗試提取檔名部分
-            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=([^;\n]+)/);
-            if (filenameMatch && filenameMatch[1]) {
-              downloadFileName.value = filenameMatch[1].trim().replace(/['"]/g, '');
-            }
-          }
-        }
+        const data = await response.json();
+        resultQuestion.value = data.question || questionText.value;
+        resultAnswer.value = data.answer || '';
+        resultSources.value = Array.isArray(data.sources) ? data.sources : [];
 
         statusType.value = 'success';
-        statusMessage.value = '✅ 成功！您的 RAG 資料庫檔案已準備好下載。';
-
+        statusMessage.value = '✅ 成功！已取得 AI 回答。';
       } catch (error) {
         statusType.value = 'error';
         statusMessage.value = `❌ 發生錯誤: ${error.message}`;
@@ -199,32 +215,24 @@ export default {
       }
     };
 
-    // 處理下載
-    const handleDownload = () => {
-      // 下載完成後清理 URL
-      setTimeout(() => {
-        if (downloadUrl.value) {
-          window.URL.revokeObjectURL(downloadUrl.value);
-        }
-      }, 100);
-    };
-
     return {
       selectedFile,
+      questionText,
       isProcessing,
       statusMessage,
       statusClass,
-      downloadUrl,
-      downloadFileName,
       isDragOver,
       uploadText,
       buttonText,
+      resultQuestion,
+      resultAnswer,
+      resultSources,
       handleFileSelect,
       handleDragOver,
       handleDragLeave,
       handleDrop,
-      processFile,
-      handleDownload
+      submitQuestion,
+      clearResult
     };
   }
 };
@@ -239,7 +247,7 @@ export default {
   --text-color: #1f2937;
 }
 
-.rag-container {
+.ask-container {
   min-height: 100vh;
   background-color: var(--bg-color);
   display: flex;
@@ -249,13 +257,13 @@ export default {
   font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-.rag-card {
+.ask-card {
   background-color: var(--card-bg);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   text-align: center;
 }
 
@@ -288,7 +296,7 @@ export default {
   border: 2px dashed #d1d5db;
   border-radius: 8px;
   padding: 2rem;
-  margin: 1.5rem 0;
+  margin: 1.5rem 0 1rem;
   transition: all 0.3s;
   cursor: pointer;
   background-color: transparent;
@@ -307,6 +315,36 @@ export default {
   color: var(--primary-color);
   font-size: 0.9rem;
   word-break: break-all;
+}
+
+.question-area {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.question-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #374151;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.question-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.question-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
 .submit-btn {
@@ -373,31 +411,35 @@ export default {
   color: #dc2626;
 }
 
-.download-link {
+.result {
   margin-top: 1rem;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   padding: 1rem;
-  background-color: #f0fdf4;
-  border-radius: 6px;
+  background-color: #f9fafb;
 }
 
-.download-link a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1rem;
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: white;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
+.result-section + .result-section {
+  margin-top: 1rem;
 }
 
-.download-link a:hover {
-  background-color: var(--primary-color);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.result-title {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.result-content {
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.result-sources {
+  padding-left: 18px;
+  margin: 0;
+  color: #374151;
 }
 
 .note {
@@ -413,7 +455,7 @@ export default {
 
 /* 響應式設計 */
 @media (max-width: 640px) {
-  .rag-card {
+  .ask-card {
     padding: 1.5rem;
   }
 
