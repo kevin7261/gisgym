@@ -152,17 +152,6 @@
   });
 
   /**
-   * 📊 判斷是否為 test_layer 圖層 (Check if is test_layer)
-   * 用於控制 test_layer 專屬功能的顯示
-   *
-   * @type {ComputedRef<boolean>}
-   * @returns {boolean} 是否為 test_layer 圖層
-   */
-  const isTestLayer = computed(() => {
-    return currentLayer.value && currentLayer.value.layerId === 'test_layer';
-  });
-
-  /**
    * 📊 取得 LayoutGridTab_Test2 當前尺寸 (Get LayoutGridTab_Test2 Current Dimensions)
    * 從 dataStore 中獲取 LayoutGridTab_Test2 的當前尺寸（以 pt 為單位）
    *
@@ -506,34 +495,6 @@
     }
   };
 
-  /**
-   * 建立 RAG (Create RAG)
-   * 處理 test_layer 的 RAG 建立功能
-   */
-  const createRAG = async () => {
-    if (!currentLayer.value) {
-      console.warn('當前圖層不存在');
-      return;
-    }
-
-    isExecuting.value = true;
-
-    try {
-      // 等待 UI 更新以顯示"計算中"畫面
-      await nextTick();
-
-      // TODO: 實現 RAG 建立邏輯
-      console.log('建立 RAG 功能待實現', currentLayer.value);
-
-      // 稍微延遲後關閉，確保用戶能看到"計算中"畫面
-      setTimeout(() => {
-        isExecuting.value = false;
-      }, 300);
-    } catch (error) {
-      console.error('建立 RAG 時發生錯誤:', error);
-      isExecuting.value = false;
-    }
-  };
 
   // ==================== 👀 響應式監聽器 (Reactive Watchers) ====================
 
@@ -2694,16 +2655,6 @@
           </button>
         </div>
 
-        <!-- 建立 RAG 按鈕區域（僅 test_layer 顯示） -->
-        <div v-if="isTestLayer && currentLayer" class="pb-3 mb-3 border-bottom">
-          <button
-            class="btn rounded-pill border-0 my-btn-green my-font-size-xs text-nowrap w-100 my-cursor-pointer"
-            @click="createRAG"
-            :disabled="isExecuting"
-          >
-            建立RAG
-          </button>
-        </div>
 
         <!-- LayoutGridTab_Test2 當前尺寸顯示（即時顯示） -->
         <div
