@@ -75,7 +75,7 @@ export default {
 
   setup() {
     // API 網址
-    const API_URL = 'https://kevin7261-gisgym.hf.space/create_rag_db';
+    const API_URL = 'https://kevin7261-gisgym.hf.space/process_zip';
 
     // 狀態變數
     const selectedFile = ref(null);
