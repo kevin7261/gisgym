@@ -1,10 +1,15 @@
 <template>
   <div class="rag-container">
     <div class="rag-card">
-      <h1 class="title">📄 PDF 轉向量庫 (RAG)</h1>
+      <h1 class="title">🗂️ Zip 資料夾轉向量庫</h1>
       <p class="description">
-        上傳您的 PDF/DOCX 文件，透過雲端 Server 進行 Embedding 運算，並下載打包好的 FAISS 索引。
+        請將您的講義資料夾 (包含 PDF, DOCX, TXT, Code 等) 壓縮成 <strong>.zip</strong> 檔上傳。
       </p>
+
+      <!-- 提示框 -->
+      <div class="tip">
+        💡 <strong>提示：</strong> 支援巢狀資料夾結構 (Nested Folders)。系統會自動保留檔案路徑資訊，方便 RAG 溯源。
+      </div>
 
       <!-- 上傳區域 -->
       <div
@@ -18,7 +23,7 @@
         <input
           ref="fileInput"
           type="file"
-          accept=".pdf,.docx,.txt"
+          accept=".zip"
           @change="handleFileSelect"
           style="display: none;"
         />
@@ -27,7 +32,7 @@
 
       <!-- 檔案名稱顯示 -->
       <div v-if="selectedFile" class="file-info">
-        已選擇: {{ selectedFile.name }}
+        📦 已選擇: {{ selectedFile.name }}
       </div>
 
       <!-- 提交按鈕 -->
@@ -54,7 +59,9 @@
 
       <!-- 注意事項 -->
       <div class="note">
-        ⚠️ 注意：若雲端主機處於休眠狀態，首次執行可能需要等待 1-2 分鐘喚醒並載入模型，請耐心等候。
+        ⚠️ <strong>注意：</strong><br>
+        1. 檔案大小請勿過大，以免連線逾時。<br>
+        2. 若 Hugging Face 主機休眠中，首次執行可能需等待 1-3 分鐘喚醒。
       </div>
     </div>
   </div>
@@ -68,7 +75,7 @@ export default {
 
   setup() {
     // API 網址
-    const API_URL = 'https://kevin7261-gisgym.hf.space/process';
+    const API_URL = 'https://kevin7261-gisgym.hf.space/process_zip';
 
     // 狀態變數
     const selectedFile = ref(null);
@@ -81,11 +88,11 @@ export default {
 
     // 計算屬性
     const uploadText = computed(() => {
-      return isDragOver.value ? '放開以上傳檔案' : '點擊或拖曳檔案至此';
+      return isDragOver.value ? '放開以上傳檔案' : '點擊或拖曳 ZIP 檔案至此';
     });
 
     const buttonText = computed(() => {
-      return isProcessing.value ? '正在處理中...' : '開始轉換並下載';
+      return isProcessing.value ? '雲端運算中...' : '上傳並製作向量庫';
     });
 
     const statusClass = computed(() => {
@@ -124,7 +131,14 @@ export default {
     // 處理檔案
     const processFile = async () => {
       if (!selectedFile.value) {
-        alert('請先選擇一個檔案！');
+        alert('請先選擇一個 ZIP 檔案！');
+        return;
+      }
+
+      // 簡單的前端檢查
+      const file = selectedFile.value;
+      if (file.type !== 'application/zip' && !file.name.endsWith('.zip')) {
+        alert('錯誤：僅支援 .zip 格式的壓縮檔');
         return;
       }
 
@@ -133,7 +147,7 @@ export default {
       downloadFileName.value = '';
       isProcessing.value = true;
       statusType.value = 'info';
-      statusMessage.value = '正在上傳並等待雲端運算...\n(如果是冷啟動，可能需要 1~3 分鐘)';
+      statusMessage.value = '🚀 正在上傳並解壓縮...這可能需要一點時間，請勿關閉視窗。';
 
       try {
         const formData = new FormData();
@@ -156,8 +170,8 @@ export default {
         // 建立下載連結
         downloadUrl.value = window.URL.createObjectURL(blob);
 
-        // 嘗試從 Header 取得檔名，或使用預設檔名
-        downloadFileName.value = selectedFile.value.name.split('.')[0] + '_faiss.zip';
+        // 處理檔名
+        downloadFileName.value = selectedFile.value.name.replace('.zip', '') + '_faiss_db.zip';
         const contentDisposition = response.headers.get('Content-Disposition');
         if (contentDisposition && contentDisposition.indexOf('attachment') !== -1) {
           const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
@@ -168,12 +182,11 @@ export default {
         }
 
         statusType.value = 'success';
-        statusMessage.value = '✅ 轉換成功！請點擊下方連結下載檔案。';
+        statusMessage.value = '✅ 成功！您的向量資料庫已下載。';
 
       } catch (error) {
-        console.error(error);
         statusType.value = 'error';
-        statusMessage.value = `❌ 發生錯誤: ${error.message}\n請確認伺服器網址是否正確，或伺服器是否正在重啟。`;
+        statusMessage.value = `❌ 發生錯誤: ${error.message}`;
       } finally {
         isProcessing.value = false;
       }
@@ -250,7 +263,18 @@ export default {
   color: #6b7280;
   font-size: 0.95rem;
   line-height: 1.5;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tip {
+  font-size: 0.85rem;
+  color: #047857;
+  background-color: #d1fae5;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: left;
+  line-height: 1.5;
 }
 
 .upload-area {
@@ -377,6 +401,7 @@ export default {
   padding: 10px;
   border-radius: 6px;
   line-height: 1.5;
+  text-align: left;
 }
 
 /* 響應式設計 */
