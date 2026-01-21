@@ -236,11 +236,6 @@
    * 生成題目 (Generate Question)
    */
   const generateQuestion = async () => {
-    if (!ragFile.value) {
-      alert('請先上傳 rag.zip 檔案！');
-      return;
-    }
-
     isGenerating.value = true;
     currentQuestion.value = null;
     questionContent.value = '';
@@ -251,7 +246,11 @@
 
     try {
       const formData = new FormData();
-      formData.append('file', ragFile.value);
+      // 只有當用戶上傳了檔案時才添加到 FormData
+      // 如果沒有上傳，後端會自動使用伺服器預設的 rag_db.zip
+      if (ragFile.value) {
+        formData.append('file', ragFile.value);
+      }
       formData.append('qtype', qtype.value);
       formData.append('level', level.value);
 
@@ -303,11 +302,6 @@
       return;
     }
 
-    if (!ragFile.value) {
-      alert('請先上傳 rag.zip 檔案！');
-      return;
-    }
-
     if (!questionContent.value) {
       alert('請先生成題目！');
       return;
@@ -318,7 +312,11 @@
 
     try {
       const formData = new FormData();
-      formData.append('file', ragFile.value);
+      // 只有當用戶上傳了檔案時才添加到 FormData
+      // 如果沒有上傳，後端會自動使用伺服器預設的 rag_db.zip
+      if (ragFile.value) {
+        formData.append('file', ragFile.value);
+      }
       formData.append('question_text', questionContent.value);
       formData.append('student_answer', studentAnswer.value);
       formData.append('qtype', qtype.value);
@@ -431,9 +429,12 @@
           <h6 class="my-title-sm-black mb-3">1. 上傳 RAG 資料庫與設定</h6>
 
           <div class="mb-3">
-            <label class="form-label my-title-xs-gray">請選擇您的 rag.zip 或 原始講義.zip</label>
+            <label class="form-label my-title-xs-gray"
+              >請選擇您的 rag.zip 或 原始講義.zip（選填，不選擇則使用伺服器預設講義）</label
+            >
             <input type="file" class="form-control" accept=".zip" @change="handleFileSelect" />
             <small v-if="ragFile" class="text-muted">已選擇: {{ ragFile.name }}</small>
+            <small v-else class="text-muted">未選擇檔案，將使用伺服器預設的 rag_db.zip</small>
           </div>
 
           <div class="row g-3 mb-3">
@@ -456,7 +457,7 @@
           <button
             class="btn btn-primary w-100"
             @click="generateQuestion"
-            :disabled="!ragFile || isGenerating"
+            :disabled="isGenerating"
           >
             <span
               v-if="isGenerating"
