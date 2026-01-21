@@ -219,9 +219,6 @@
   const isGrading = ref(false);
   const gradingResult = ref(null);
 
-  // API 設定顯示狀態
-  const showApiConfig = ref(false);
-
   /**
    * 處理檔案選擇 (Handle File Selection)
    */
@@ -394,35 +391,6 @@
       <!-- 🤖 test_layer 專用：AI 出題與評分功能 -->
       <div v-if="isTestLayer" class="ai-assistant-container">
         <h5 class="my-title-md-black mb-4">🎓 AI 空間分析助教 (RAG 版)</h5>
-
-        <!-- API 伺服器設定 -->
-        <div class="ai-section mb-3 p-3 border rounded bg-light">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <small class="text-muted">API 伺服器地址：</small>
-              <code class="ms-2">{{ API_BASE }}</code>
-            </div>
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              type="button"
-              @click="showApiConfig = !showApiConfig"
-            >
-              {{ showApiConfig ? '▼ 隱藏' : '⚙️ 修改' }}
-            </button>
-          </div>
-          <div v-if="showApiConfig" class="mt-2 p-2 bg-white rounded">
-            <label class="form-label small">API 基礎 URL：</label>
-            <input
-              v-model="API_BASE"
-              type="text"
-              class="form-control form-control-sm"
-              placeholder="https://kevin7261-gisgym.hf.space"
-            />
-            <small class="text-muted"
-              >請輸入完整的 API 伺服器地址（包含 http:// 或 https://）</small
-            >
-          </div>
-        </div>
 
         <!-- 1. 上傳 RAG 資料庫與設定 -->
         <div class="ai-section mb-4 p-3 border rounded">
