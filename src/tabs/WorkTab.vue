@@ -277,7 +277,8 @@
       let errorMessage = error.message;
 
       if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-        errorMessage = `無法連接到 API 伺服器 (${API_BASE.value})\n\n` +
+        errorMessage =
+          `無法連接到 API 伺服器 (${API_BASE.value})\n\n` +
           `可能的原因：\n` +
           `1. API 伺服器未啟動（請確認後端服務是否運行在 ${API_BASE.value}）\n` +
           `2. CORS 跨域問題（請檢查後端是否允許來自 ${window.location.origin} 的請求）\n` +
@@ -341,7 +342,8 @@
       let errorMessage = error.message;
 
       if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-        errorMessage = `無法連接到 API 伺服器 (${API_BASE.value})\n\n` +
+        errorMessage =
+          `無法連接到 API 伺服器 (${API_BASE.value})\n\n` +
           `可能的原因：\n` +
           `1. API 伺服器未啟動（請確認後端服務是否運行在 ${API_BASE.value}）\n` +
           `2. CORS 跨域問題（請檢查後端是否允許來自 ${window.location.origin} 的請求）\n` +
@@ -412,13 +414,15 @@
           </div>
           <div v-if="showApiConfig" class="mt-2 p-2 bg-white rounded">
             <label class="form-label small">API 基礎 URL：</label>
-              <input
-                v-model="API_BASE"
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="https://kevin7261-gisgym.hf.space"
-              />
-              <small class="text-muted">請輸入完整的 API 伺服器地址（包含 http:// 或 https://）</small>
+            <input
+              v-model="API_BASE"
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="https://kevin7261-gisgym.hf.space"
+            />
+            <small class="text-muted"
+              >請輸入完整的 API 伺服器地址（包含 http:// 或 https://）</small
+            >
           </div>
         </div>
 
@@ -428,12 +432,7 @@
 
           <div class="mb-3">
             <label class="form-label my-title-xs-gray">請選擇您的 rag.zip 或 原始講義.zip</label>
-            <input
-              type="file"
-              class="form-control"
-              accept=".zip"
-              @change="handleFileSelect"
-            />
+            <input type="file" class="form-control" accept=".zip" @change="handleFileSelect" />
             <small v-if="ragFile" class="text-muted">已選擇: {{ ragFile.name }}</small>
           </div>
 
@@ -459,7 +458,11 @@
             @click="generateQuestion"
             :disabled="!ragFile || isGenerating"
           >
-            <span v-if="isGenerating" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <span
+              v-if="isGenerating"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+            ></span>
             {{ isGenerating ? '🧠 AI 正在讀取 Zip 並出題中... (約需 10-20 秒)' : '🚀 生成題目' }}
           </button>
         </div>
@@ -497,7 +500,11 @@
             @click="gradeSubmission"
             :disabled="!studentAnswer.trim() || isGrading"
           >
-            <span v-if="isGrading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <span
+              v-if="isGrading"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+            ></span>
             {{ isGrading ? '👀 AI 正在對照講義進行評分...' : '📝 送出並評分' }}
           </button>
         </div>
@@ -511,31 +518,43 @@
               <div>
                 分數：<span class="score-badge">{{ gradingResult.score }}</span> / 10
               </div>
-              <div class="level-badge">
-                等級：{{ gradingResult.level }}
-              </div>
+              <div class="level-badge">等級：{{ gradingResult.level }}</div>
             </div>
             <hr />
 
             <div v-if="gradingResult.strengths && gradingResult.strengths.length > 0" class="mb-3">
               <h6 class="my-title-xs-black mb-2">👍 優點：</h6>
               <ul class="mb-0">
-                <li v-for="(strength, index) in gradingResult.strengths" :key="index" class="text-success">
+                <li
+                  v-for="(strength, index) in gradingResult.strengths"
+                  :key="index"
+                  class="text-success"
+                >
                   {{ strength }}
                 </li>
               </ul>
             </div>
 
-            <div v-if="gradingResult.weaknesses && gradingResult.weaknesses.length > 0" class="mb-3">
+            <div
+              v-if="gradingResult.weaknesses && gradingResult.weaknesses.length > 0"
+              class="mb-3"
+            >
               <h6 class="my-title-xs-black mb-2">⚠️ 待改進：</h6>
               <ul class="mb-0">
-                <li v-for="(weakness, index) in gradingResult.weaknesses" :key="index" class="text-warning">
+                <li
+                  v-for="(weakness, index) in gradingResult.weaknesses"
+                  :key="index"
+                  class="text-warning"
+                >
                   {{ weakness }}
                 </li>
               </ul>
             </div>
 
-            <div v-if="gradingResult.action_items && gradingResult.action_items.length > 0" class="mb-3">
+            <div
+              v-if="gradingResult.action_items && gradingResult.action_items.length > 0"
+              class="mb-3"
+            >
               <h6 class="my-title-xs-black mb-2">📋 建議事項：</h6>
               <ul class="mb-0">
                 <li v-for="(item, index) in gradingResult.action_items" :key="index">
