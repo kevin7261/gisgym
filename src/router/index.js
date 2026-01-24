@@ -75,7 +75,7 @@ const routes = [
     name: 'Home', // 路由名稱，用於程式化導航
     component: HomeView, // 對應的 Vue 組件
     meta: {
-      title: '示意圖響應式網站', // 頁面標題
+      title: 'GISGym', // 頁面標題
       description: 'GISGym', // 頁面描述
       requiresAuth: false, // 是否需要身份驗證
     },
@@ -173,9 +173,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // 設定頁面標題
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 示意圖響應式網站`;
+    document.title = `${to.meta.title} - GISGym`;
   } else {
-    document.title = '示意圖響應式網站';
+    document.title = 'GISGym';
   }
 
   // 記錄路由切換日誌（開發環境）
