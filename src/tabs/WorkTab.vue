@@ -11,6 +11,7 @@
   // ==================== 📦 第三方庫引入 (Third-Party Library Imports) ====================
   import { ref, computed, watch, onMounted } from 'vue';
   import { useDataStore } from '@/stores/dataStore.js';
+  import { writeQuestionToSheets } from '@/utils/googleSheets.js';
 
   // ==================== 🏪 狀態管理初始化 (State Management Initialization) ====================
   const dataStore = useDataStore();
@@ -266,6 +267,29 @@
       questionContent.value = data.question_content || '';
       questionHint.value = data.hint || '';
       questionTargetFile.value = data.target_filename || '';
+
+      // 📝 自動寫入題目到 Google Sheets
+      try {
+        const result = await writeQuestionToSheets(
+          {
+            question_content: questionContent.value,
+            hint: questionHint.value,
+            target_filename: questionTargetFile.value,
+            qtype: qtype.value,
+            level: level.value,
+          },
+          { silent: false } // 顯示錯誤提示以便調試
+        );
+        if (result.success) {
+          console.log('✅ 題目已成功寫入 Google Sheets');
+        } else {
+          console.warn('⚠️ 寫入 Google Sheets 失敗:', result.message);
+        }
+      } catch (sheetsError) {
+        // 寫入 Google Sheets 失敗不影響主要流程，但記錄詳細錯誤
+        console.error('❌ 寫入 Google Sheets 發生錯誤:', sheetsError);
+        console.error('錯誤詳情:', sheetsError.message);
+      }
     } catch (error) {
       console.error('出題失敗:', error);
 
